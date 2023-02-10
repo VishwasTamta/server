@@ -40,9 +40,9 @@ Cart.belongsToMany(Product, { through: CartItem });
 Product.belongsToMany(Cart, { through: CartItem });
 
 sequelize
-  .sync({ force: true }) // remove for development
+  // .sync({ force: true }) // remove for development
   // make tables according to the models defined
-  // .sync()
+  .sync()
   .then((result) => {
     return User.findByPk(1);
   })
@@ -54,6 +54,9 @@ sequelize
   })
   .then((user) => {
     // console.log(user);
+    user.createCart();
+  })
+  .then((cart) => {
     app.listen(3030);
   })
   .catch((err) => console.log(err));
