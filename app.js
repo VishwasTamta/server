@@ -4,6 +4,7 @@ const adminRoutes = require("./routes/admin");
 const ShopRoutes = require("./routes/shop");
 const path = require("path");
 const errorController = require("./controllers/error");
+const sequelize = require("./utils/database");
 
 const app = express();
 
@@ -17,4 +18,9 @@ app.use("/admin", adminRoutes);
 app.use(ShopRoutes);
 app.use(errorController.get404);
 
-app.listen(3030);
+sequelize
+  .sync() // make tables according to the models defined
+  .then((result) => {
+    app.listen(3030);
+  })
+  .catch((err) => console.log(err));
