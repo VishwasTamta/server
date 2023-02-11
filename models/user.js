@@ -3,9 +3,9 @@ const { getDb } = require("../utils/database");
 
 const ObjectId = mongodb.ObjectId;
 class User {
-  constructor(email, password, cart, id) {
+  constructor(name, email, cart, id) {
+    this.name = name;
     this.email = email;
-    this.password = password;
     this.cart = cart;
     this._id = id;
   }
@@ -60,6 +60,38 @@ class User {
           };
         });
       });
+  }
+
+  addOrder() {
+    const db = getDb();
+    return this.getCart()
+      .then((products) => {
+        const order = {
+          items: products,
+          user: {
+            _id: new ObjectId(this._id),
+            name: this.email,
+          },
+        };
+        return db.collection("orders").insertOne(order);
+      })
+      .then((result) => {
+        this.cart = { items: [] };
+        return db
+          .collection("users")
+          .updateOne(
+            { _id: new ObjectId(this._id) },
+            { $set: { cart: { items: [] } } }
+          );
+      });
+  }
+
+  getOrders() {
+    const db = getDb();
+    return db
+      .collection("orders")
+      .find({ "user._id": new ObjectId(this._id) })
+      .toArray();
   }
 
   deleteItemFromCart(productId) {
