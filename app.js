@@ -19,7 +19,7 @@ app.use(express.static(path.join(__dirname, "public"))); //Giving access for pub
 app.use((req, res, next) => {
   User.findById("63e779988117cc58cd36a8d2")
     .then((user) => {
-      req.user = user;
+      req.user = new User(user.name, user.email, user.cart, user._id);
       next();
     })
     .catch((err) => console.log(err));
