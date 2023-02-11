@@ -5,6 +5,7 @@ const ShopRoutes = require("./routes/shop");
 const path = require("path");
 const errorController = require("./controllers/error");
 const { mongoConnect } = require("./utils/database");
+const User = require("./models/user");
 
 const app = express();
 
@@ -16,7 +17,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public"))); //Giving access for public folder
 
 app.use((req, res, next) => {
-  next();
+  User.findById("63e779988117cc58cd36a8d2")
+    .then((user) => {
+      req.user = user;
+      next();
+    })
+    .catch((err) => console.log(err));
 });
 
 app.use("/admin", adminRoutes);
