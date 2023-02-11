@@ -2,20 +2,25 @@ const { getDb } = require("../utils/database");
 const mongodb = require("mongodb");
 
 class Product {
-  constructor(title, price, imageURL, description) {
-    (this.title = title),
-      (this.price = price),
-      (this.imageURL = imageURL),
-      (this.description = description);
+  constructor(title, price, imageURL, description, _id) {
+    this.title = title;
+    this.price = price;
+    this.imageURL = imageURL;
+    this.description = description;
+    this._id = _id ? new mongodb.ObjectId(_id) : null;
   }
 
   save() {
     const db = getDb();
-    return db
-      .collection("products")
-      .insertOne(this)
-      .then((result) => console.log(result))
-      .catch((err) => console.log(err));
+    let dbOpp = db;
+    if (this._id) {
+      dbOpp = db
+        .collection("products")
+        .updateOne({ _id: new mongodb.ObjectId(this._id) }, { $set: this });
+    } else {
+      dbOpp = db.collection("products").insertOne(this);
+    }
+    return dbOpp.then().catch((err) => console.log(err));
   }
 
   static fetchAll() {
@@ -42,28 +47,17 @@ class Product {
       })
       .catch((err) => console.log(err));
   }
-}
 
-// const Product = sequelize.define("product", {
-//   id: {
-//     type: Sequelize.INTEGER,
-//     autoIncrement: true,
-//     primaryKey: true,
-//     allowNull: false,
-//   },
-//   title: Sequelize.STRING,
-//   price: {
-//     type: Sequelize.DOUBLE,
-//     allowNull: false,
-//   },
-//   imageURL: {
-//     type: Sequelize.STRING,
-//     allowNull: false,
-//   },
-//   description: {
-//     type: Sequelize.STRING,
-//     allowNull: false,
-//   },
-// });
+  static deleteById(prodId) {
+    const db = getDb();
+    return db
+      .collection("products")
+      .deleteOne({ _id: new mongodb.ObjectId(prodId) })
+      .then(() => {
+        console.log("Deleted one product!");
+      })
+      .catch((err) => console.log(err));
+  }
+}
 
 module.exports = Product;
