@@ -14,10 +14,9 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
-  console.log("Vishwas Tamta");
   const title = req.body.title;
   const image = req.file;
-  console.log(image, "image");
+  // console.log(image, "image");
   const price = req.body.price;
   const description = req.body.description;
   let imageUrl;
