@@ -21,7 +21,7 @@ exports.postAddProduct = (req, res, next) => {
   const description = req.body.description;
   let imageUrl;
   if (image) {
-    imageUrl = "/" + image.path;
+    imageUrl = image.path;
   }
   const product = new Product({
     title: title,
@@ -157,23 +157,41 @@ exports.postEditProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
+  const ITEMS_PER_PAGE = 1;
+  const page = +req.query.page || 1;
+  let totalItems;
+
   Product.find({ userId: req.user._id })
+    .countDocuments()
+    .then((numProducts) => {
+      totalItems = numProducts;
+      return Product.find()
+        .skip((page - 1) * ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE);
+    })
     .then((products) => {
       res.render("admin/products", {
         prods: products,
         pageTitle: "Admin Products",
         path: "/admin/products",
+        currentPage: page,
+        hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+        hasPreviousPage: page > 1,
+        nextPage: page + 1,
+        previousPage: page - 1,
+        lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
       });
     })
     .catch((err) => {
       const error = new Error(err);
+      console.log(err);
       err.httpStatusCode(500);
       return next(error);
     });
 };
 
-exports.postDeleteProduct = (req, res, next) => {
-  const prodId = req.body.productId;
+exports.deleteProduct = (req, res, next) => {
+  const prodId = req.params.productId;
   Product.findById(prodId)
     .then((product) => {
       if (!product) {
@@ -181,17 +199,15 @@ exports.postDeleteProduct = (req, res, next) => {
       }
       deleteFile(product.imageUrl);
       return Product.deleteOne({
-        productId: prodId,
+        _id: prodId,
         userId: req.user._id,
       });
     })
     .then(() => {
       console.log("DESTROYED PRODUCT");
-      res.redirect("/admin/products");
+      res.status(200).json({ message: "Product Deleted" });
     })
     .catch((err) => {
-      const error = new Error(err);
-      err.httpStatusCode(500);
-      return next(error);
+      res.status(500).json({ message: "Deleting product failed!" });
     });
 };

@@ -43,6 +43,6 @@ router.post(
   adminController.postEditProduct
 );
 
-router.post("/delete-product", authCheck, adminController.postDeleteProduct);
+router.delete("/product/:productId", authCheck, adminController.deleteProduct);
 
 module.exports = router;
