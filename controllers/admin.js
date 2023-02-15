@@ -21,7 +21,7 @@ exports.postAddProduct = (req, res, next) => {
   const description = req.body.description;
   let imageUrl;
   if (image) {
-    imageUrl = image.path;
+    imageUrl = "/" + image.path;
   }
   const product = new Product({
     title: title,
@@ -159,7 +159,6 @@ exports.postEditProduct = (req, res, next) => {
 exports.getProducts = (req, res, next) => {
   Product.find({ userId: req.user._id })
     .then((products) => {
-      console.log(products);
       res.render("admin/products", {
         prods: products,
         pageTitle: "Admin Products",
