@@ -2,7 +2,7 @@ const express = require("express");
 
 const authController = require("../controllers/auth");
 const { check, body } = require("express-validator/check");
-const user = require("../models/user");
+const User = require("../models/user");
 
 const router = express.Router();
 
@@ -20,8 +20,9 @@ router.post(
     check("email")
       .isEmail()
       .withMessage("Please enter a valid email!")
+      .normalizeEmail()
       .custom((value, { req }) => {
-        return user.findOne({ email: value }).then((userDoc) => {
+        return User.findOne({ email: value }).then((userDoc) => {
           if (userDoc) {
             return Promise.reject(
               "E-mail already exist, please pick a different one."
@@ -34,13 +35,16 @@ router.post(
       "Please enter a password which only contain numbers and alfabets and should be 5 character long!"
     )
       .isAlphanumeric()
+      .trim()
       .isLength({ min: 5 }),
-    body("cnfPassword").custom((value, { req }) => {
-      if (value !== req.body.password) {
-        throw new Error("Password do not match!");
-      }
-      return true;
-    }),
+    body("cnfPassword")
+      .trim()
+      .custom((value, { req }) => {
+        if (value !== req.body.password) {
+          throw new Error("Password do not match!");
+        }
+        return true;
+      }),
   ],
   authController.postSignup
 );

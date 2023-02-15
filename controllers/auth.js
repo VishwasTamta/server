@@ -67,6 +67,20 @@ exports.postLogin = (req, res, next) => {
           validationErrors: [{ param: "email", error: "Email is incorrect." }],
         });
       }
+      if (!errors.isEmpty()) {
+        console.log(errors.array());
+        return res.status(422).render("auth/signup", {
+          path: "/signup",
+          pageTitle: "Signup",
+          errorMessage: errors.array()[0].msg,
+          oldInput: {
+            email: email,
+            password: password,
+            cnfPassword: cnfPassword,
+          },
+          validationErrors: errors.array(),
+        });
+      }
       bcrypt
         .compare(password, user.password)
         .then((doMatch) => {
