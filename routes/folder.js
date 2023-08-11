@@ -5,4 +5,6 @@ const router = express.Router();
 
 router.post("/getFolder", folder.getFolder);
 
+router.get("/getFiles/:fileName", folder.getFiles);
+
 module.exports = router;

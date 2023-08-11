@@ -4,16 +4,12 @@ const path = require("path");
 exports.getFolder = (req, res, next) => {
   const pathName = req.body.pathName;
   const page = req.body.page;
-  console.log(pathName);
-  console.log(page);
   const pathArr = pathName.split(">");
-  console.log(pathArr);
   let url = path.join(__dirname, "..", "folders", ...pathArr);
 
   try {
-    switch (pathName) {
-      case "/":
-        url = path.join(__dirname, "..", "folders");
+    if (pathName === "/") {
+      url = path.join(__dirname, "..", "folders");
     }
     fs.readdir(url, (err, files) => {
       if (err) {
@@ -42,4 +38,27 @@ exports.getFolder = (req, res, next) => {
     }
     next(err);
   }
+};
+
+exports.getFiles = (req, res, next) => {
+  const fileName = req.params.fileName;
+  let url = path.join(__dirname, "..", "folders");
+
+  fs.readdir(url, { recursive: true }, (err, data) => {
+    console.log(data);
+
+    let files = [];
+    data.forEach((elem) => {
+      const split = elem.split("/");
+      const last = split[split.length - 1];
+      if (
+        last.includes(fileName) ||
+        last.includes(fileName.split(".")[0] + "_")
+      ) {
+        files.push(elem);
+      }
+    });
+    res.json({ message: "Files fetched Successfully!", files: files });
+    return;
+  });
 };
